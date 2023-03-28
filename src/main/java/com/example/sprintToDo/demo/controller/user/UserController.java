@@ -7,6 +7,8 @@ import com.example.sprintToDo.demo.entity.User;
 import com.example.sprintToDo.demo.service.user.UserService;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.errors.MailjetSocketTimeoutException;
+import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<UserDto> createUser(@RequestBody CreateUserDto user) throws MailjetSocketTimeoutException, MailjetException {
+    public ResponseEntity<UserDto> createUser(@RequestBody @Valid CreateUserDto user) throws MailjetSocketTimeoutException, MailjetException {
         UserDto resultUser = userService.createUser(user);
         return ResponseEntity.ok(resultUser);
     }
@@ -35,8 +37,21 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/filter")
+    public  ResponseEntity<List<UserDto>> getUserFilter(@RequestBody UserDto user){
+        List<UserDto> users = userService.getUserByFiltred(user);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{id}")
+    public  ResponseEntity<UserDto> getUserById(@PathVariable("id") Long id){
+        UserDto user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+
     @PostMapping("/login")
-    public ResponseEntity<Boolean> loginUser(@RequestBody UserLogin user){
+    public ResponseEntity<Boolean> loginUser(@RequestBody @Valid UserLogin user){
         Boolean result = userService.userLogin(user);
         return ResponseEntity.ok(result);
     }
@@ -45,5 +60,17 @@ public class UserController {
     public ResponseEntity<Boolean> excelExportUser(@RequestBody UserLogin user){
         Boolean excelStatus = userService.excelExportUser(user);
         return ResponseEntity.ok(excelStatus);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto user, @PathVariable("id") Long id ){
+        UserDto updateUser = userService.updateUser(user, id);
+        return ResponseEntity.ok(updateUser);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Boolean> deleteUser(@PathVariable("id") Long id){
+        Boolean deleteUser = userService.deleteUser(id);
+        return ResponseEntity.ok(deleteUser);
     }
 }

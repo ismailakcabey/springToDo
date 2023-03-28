@@ -19,5 +19,9 @@ public interface UserService {
 
     UserDto updateUser(UserDto user , Long id);
 
+    Boolean deleteUser(Long id);
 
+    UserDto getUserById(Long id);
+
+    List<UserDto> getUserByFiltred(UserDto filter);
 }

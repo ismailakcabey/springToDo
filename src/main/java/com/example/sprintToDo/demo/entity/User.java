@@ -19,7 +19,6 @@ public class User extends BaseEntity{
     @SequenceGenerator(name="user_seq_gen",sequenceName = "user_gen",initialValue = 1,allocationSize = 50)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "user_seq_gen")
     private long id;
-    @NotNull
     @Size(max = 100)
     private String fullName;
     @NotNull
@@ -27,7 +26,6 @@ public class User extends BaseEntity{
     @Email
     @NotNull
     @Size(max = 100)
-    @UniqueElements
     private String email;
     @Column()
     private Boolean emailStatus = false;

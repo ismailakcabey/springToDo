@@ -1,9 +1,5 @@
 package com.example.sprintToDo.demo.service.user;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.sprintToDo.demo.dto.CreateUserDto;
 import com.example.sprintToDo.demo.dto.UserLogin;
 import com.example.sprintToDo.demo.service.email.EmailService;
@@ -20,6 +16,8 @@ import com.example.sprintToDo.demo.dto.UserDto;
 import com.example.sprintToDo.demo.entity.User;
 import com.example.sprintToDo.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +26,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,7 +113,37 @@ public class UserImp implements UserService{
 
     @Override
     public UserDto updateUser(UserDto user, Long id) {
+        Optional<User> updateUser = userRepository.findById(id);
+        if(!(updateUser.isPresent())) return null;
+        if(user.getEmail() != null) updateUser.get().setEmail(user.getEmail());
+        if(user.getFullName() != null) updateUser.get().setFullName(user.getFullName());
+        if(user.getPhoneNumber() != null) updateUser.get().setPhoneNumber(user.getPhoneNumber());
+        if(user.getBirthDateAt() != null) updateUser.get().setBirthDateAt(user.getBirthDateAt());
+        if(user.getEmailStatus() != null) updateUser.get().setEmailStatus(user.getEmailStatus());
+        updateUser.get().setUpdatedAt(new Date());
+        updateUser.get().setUpdatedById(1L);
+        return modelMapper.map(userRepository.save(updateUser.get()),UserDto.class);
+    }
 
-        return null;
+    @Override
+    public Boolean deleteUser(Long id) {
+        Optional<User> deleteUser = userRepository.findById(id);
+        if(!(deleteUser.isPresent())) return false;
+        userRepository.deleteById(id);
+        return true;
+    }
+
+    @Override
+    public UserDto getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if(!(user.isPresent())) return null;
+        return modelMapper.map(user.get(),UserDto.class);
+    }
+
+    @Override
+    public List<UserDto> getUserByFiltred(UserDto filter) {
+        List<User> users = userRepository.findByFilter(filter.getFullName(),filter.getEmail());
+        List<UserDto> userDtos = users.stream().map(user->modelMapper.map(user,UserDto.class)).collect(Collectors.toList());
+        return userDtos;
     }
 }

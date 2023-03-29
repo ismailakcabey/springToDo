@@ -15,7 +15,7 @@ public interface UserService {
 
     Boolean userLogin (UserLogin user);
 
-    Boolean excelExportUser(UserLogin user);
+    Boolean excelExportUser(String email);
 
     UserDto updateUser(UserDto user , Long id);
 

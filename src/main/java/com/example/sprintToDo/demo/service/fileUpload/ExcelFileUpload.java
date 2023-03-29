@@ -25,7 +25,7 @@ public class ExcelFileUpload {
 
     private final EmailService emailService;
 
-    public Boolean s3Upload(UserLogin user, String filePath , String fileName, String fileType) {
+    public Boolean s3Upload(String user, String filePath , String fileName, String fileType) {
         final String AWS_ACCESS_KEY_ID = dotenv.get("AWS_ACCESS_KEY_ID");
         final String AWS_SECRET_ACCESS_KEY = dotenv.get("AWS_SECRET_ACCESS_KEY");
         final String AWS_BUCKET = dotenv.get("AWS_BUCKET");
@@ -58,7 +58,7 @@ public class ExcelFileUpload {
             String urlReplace3 = urlReplace2.replace(":", "%3A");
             String fileUrl = "https://"+urlReplace3;
             System.out.println(fileUrl);
-            emailService.sendExcelEmail(user.getEmail(),fileUrl);
+            emailService.sendExcelEmail(user,fileUrl);
         } catch (AmazonServiceException e) {
             // Handle Amazon S3 service errors
             e.printStackTrace();

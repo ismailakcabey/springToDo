@@ -18,15 +18,20 @@ import com.example.sprintToDo.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +44,8 @@ public class UserImp implements UserService{
     private final EmailService emailService;
 
     private final ExcelFileUpload excelFileUpload;
+
+    private final RedisTemplate redisTemplate;
 
     @Override
     public UserDto createUser(CreateUserDto createUserDto) throws MailjetSocketTimeoutException, MailjetException {
@@ -70,7 +77,12 @@ public class UserImp implements UserService{
     }
 
     @Override
-    public Boolean excelExportUser(UserLogin sendMailUser) {
+    public Boolean excelExportUser(String email) {
+        String emailSet = (String) redisTemplate.opsForSet().randomMember(email);
+        System.out.println(emailSet);
+        if(emailSet != null){
+            return false;
+        }
         List<User> users = userRepository.findAll();
         List<UserDto> userDtos = users.stream().map(user->modelMapper.map(user,UserDto.class)).collect(Collectors.toList());
         String[] row_heading = {"fullName","email","birthdDate","phoneNumber"};
@@ -102,7 +114,9 @@ public class UserImp implements UserService{
             String filePath = "/Users/ismailakca/desktop/cvDeneme/user"+replaced+".xlsx";
             workbook.write(out);
             out.close();
-            excelFileUpload.s3Upload(sendMailUser,filePath,replaced,"xlsx");
+            excelFileUpload.s3Upload(email,filePath,replaced,"xlsx");
+            redisTemplate.opsForSet().add(email, true);
+            redisTemplate.expire(email, 5000, TimeUnit.MILLISECONDS);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -142,7 +156,7 @@ public class UserImp implements UserService{
 
     @Override
     public List<UserDto> getUserByFiltred(UserDto filter) {
-        List<User> users = userRepository.findByFilter(filter.getFullName(),filter.getEmail());
+        List<User> users = userRepository.findByFilter(filter.getFullName(),filter.getEmail(),filter.getPhoneNumber());
         List<UserDto> userDtos = users.stream().map(user->modelMapper.map(user,UserDto.class)).collect(Collectors.toList());
         return userDtos;
     }

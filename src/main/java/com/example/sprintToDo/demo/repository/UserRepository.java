@@ -26,6 +26,6 @@ public interface UserRepository extends JpaRepository<User,Long>    {
     User findByEmail(String email);
 
 
-    @Query("select u from User u where (:name IS NULL OR u.fullName=:name) AND (:mail IS NULL OR u.email = :mail)")
-    List<User> findByFilter(@Param("name") String name, @Param("mail") String mail);
+    @Query("select u from User u where (:name IS NULL OR u.fullName=:name) AND (:mail IS NULL OR u.email = :mail) AND (:phone IS NULL OR u.phoneNumber = :phone) ")
+    List<User> findByFilter(@Param("name") String name, @Param("mail") String mail , @Param("phone") String phone );
 }

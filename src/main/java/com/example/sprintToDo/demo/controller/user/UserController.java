@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @GetMapping("/filter")
-    public  ResponseEntity<List<UserDto>> getUserFilter(@RequestBody UserDto user){
+    public  ResponseEntity<List<UserDto>> getUserFilter(@ModelAttribute UserDto user){
         List<UserDto> users = userService.getUserByFiltred(user);
         return ResponseEntity.ok(users);
     }
@@ -56,9 +56,11 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/excel")
+    @GetMapping("/excel")
     public ResponseEntity<Boolean> excelExportUser(@RequestBody UserLogin user){
-        Boolean excelStatus = userService.excelExportUser(user);
+        System.out.println("controllerda");
+        System.out.println(user.getEmail());
+        Boolean excelStatus = userService.excelExportUser(user.getEmail());
         return ResponseEntity.ok(excelStatus);
     }
 
